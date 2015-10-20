@@ -58,7 +58,12 @@ elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # install.
     deactivate
 
-    ls testenv
+    if [ -e testvenv ]; then
+        echo 'testvenv cached:'
+        ls testvenv
+        echo 
+        echo
+    fi
     # Create a new virtualenv using system site packages for numpy and scipy
     virtualenv --system-site-packages testvenv
     source testvenv/bin/activate
