@@ -23,6 +23,12 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # itself
     mkdir -p download
     cd download
+    echo 'We are in :'
+    pwd
+    echo 'with those files:'
+    ls -l
+    echo
+    echo
     if [[ ! -f miniconda.sh ]]
         then
         wget http://repo.continuum.io/miniconda/Miniconda-3.6.0-Linux-x86_64.sh \
@@ -52,6 +58,7 @@ elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # install.
     deactivate
 
+    ls testenv
     # Create a new virtualenv using system site packages for numpy and scipy
     virtualenv --system-site-packages testvenv
     source testvenv/bin/activate
