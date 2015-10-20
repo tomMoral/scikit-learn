@@ -28,6 +28,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     # Use the miniconda installer for faster download / install of conda
     # itself
+    pushd .
+    cd
     mkdir -p download
     cd download
     echo 'We are in :'
@@ -45,6 +47,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
     cd ..
     export PATH=/home/travis/miniconda/bin:$PATH
     conda update --yes conda
+    popd
 
     # Configure the conda environment and put it in the path using the
     # provided versions
