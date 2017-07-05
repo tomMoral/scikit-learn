@@ -19,6 +19,7 @@ occurs due to changes in the modelling logic (bug fixes or enhancements), or in
 random sampling procedures.
 
    * :class:`sklearn.ensemble.IsolationForest` (bug fix)
+   * :class:`sklearn.manifold.TSNE` (bug fix)
 
 Details are listed in the changelog below.
 
@@ -231,6 +232,14 @@ Enhancements
 
    - Speed improvements to :class:`model_selection.StratifiedShuffleSplit`.
      :issue:`5991` by :user:`Arthur Mensch <arthurmensch>` and `Joel Nothman`_.
+
+   - Memory improvements to :class:`manifold.TSNE`
+     :issue:`7089` by :user:`Thomas Moreau <tomMoral> and :user:`Olivier Grisel <ogrisel>`.
+
+   - Optimization schedule improvements for so the results are closer to the
+     one from the reference implementation
+     `lvdmaaten/bhtsne<https://github.com/lvdmaaten/bhtsne>`_, by
+     :user:`Thomas Moreau <tomMoral> and :user:`Olivier Grisel <ogrisel>`.
 
 Bug fixes
 .........
@@ -449,6 +458,14 @@ Bug fixes
      :class:`decomposition.RandomizedPCA` and
      :class:`decomposition.IncrementalPCA`.
      :issue:`9105` by `Hanmin Qin <https://github.com/qinhanmin2014>`_. 
+
+   - Fixed the implementation of :class:`manifold.TSNE`:
+      - ``early_exageration`` parameter had no effect and is now used for the
+        first 250 optimization iterations.
+      - Fixed the ``InsersionError`` reported in :issue:`8992`.
+      - Improve the learning schedule to match the one from the reference
+        implementation `lvdmaaten/bhtsne<https://github.com/lvdmaaten/bhtsne>`_.
+     by :user:`Thomas Moreau <tomMoral> and :user:`Olivier Grisel <ogrisel>`.
 
 API changes summary
 -------------------
