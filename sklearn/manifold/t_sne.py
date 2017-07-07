@@ -338,6 +338,8 @@ def _gradient_descent(objective, p0, it, n_iter,
     gains = np.ones_like(p)
     error = np.finfo(np.float).max
     best_error = np.finfo(np.float).max
+    prev_error = np.finfo(np.float).max
+    c_prev = it
     best_iter = i = it
 
     tic = time()
@@ -366,16 +368,25 @@ def _gradient_descent(objective, p0, it, n_iter,
                       " gradient norm = %.7f"
                       " (%s iterations in %0.3fs)"
                       % (i + 1, error, grad_norm, n_iter_check, duration))
-
-            if error < best_error:
-                best_error = error
-                best_iter = i
-            elif i - best_iter > n_iter_without_progress:
+            
+            if error < prev_error:
+                c_prev = i
+            prev_error = error
+            if i - c_prev > n_iter_without_progress:
                 if verbose >= 2:
                     print("[t-SNE] Iteration %d: did not make any progress "
                           "during the last %d episodes. Finished."
                           % (i + 1, n_iter_without_progress))
                 break
+            # if error < best_error:
+            #     best_error = error
+            #     best_iter = i
+            # elif i - best_iter > n_iter_without_progress:
+            #     if verbose >= 2:
+            #         print("[t-SNE] Iteration %d: did not make any progress "
+            #               "during the last %d episodes. Finished."
+            #               % (i + 1, n_iter_without_progress))
+            #     break
             if grad_norm <= min_grad_norm:
                 if verbose >= 2:
                     print("[t-SNE] Iteration %d: gradient norm %f. Finished."
@@ -803,26 +814,19 @@ class TSNE(BaseEstimator):
 
         opt_args = {"it": 0,
                     "learning_rate": self.learning_rate,
-                    "verbose": self.verbose, "n_iter_check": 50,
-                    "kwargs": dict(skip_num_points=skip_num_points)}
+                    "verbose": self.verbose, "n_iter_check": 5,
+                    "kwargs": dict(skip_num_points=skip_num_points),
+                    "min_grad_norm": self.min_grad_norm,
+                    "n_iter_without_progress": EXPLORATION_N_ITER}
         if self.method == 'barnes_hut':
             obj_func = _kl_divergence_bh
-            args = [P, degrees_of_freedom, n_samples,
-                    self.n_components]
-
-            opt_args['args'] = args
-            opt_args['n_iter_without_progress'] = EXPLORATION_N_ITER
-            # Don't always calculate the cost since that calculation
-            # can be nearly as expensive as the gradient
             opt_args['kwargs']['angle'] = self.angle
-            opt_args['kwargs']['verbose'] = self.verbose
         else:
             obj_func = _kl_divergence
-            opt_args['args'] = [P, degrees_of_freedom, n_samples,
-                                self.n_components]
-            opt_args['n_iter_without_progress'] = self.n_iter_without_progress
             opt_args['min_error_diff'] = 0.0
-            opt_args['min_grad_norm'] = self.min_grad_norm
+
+        opt_args['args'] = [P, degrees_of_freedom, n_samples,
+                            self.n_components]
 
         # Learning schedule (part 1): do 250 iteration with lower momentum but
         # higher learning rate controlled via the early exageration parameter

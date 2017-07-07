@@ -376,6 +376,24 @@ cdef class _QuadTree:
                 "in children."
                 .format(self.n_points, self.cells[0].cumulative_size))
 
+    def get_summary(self, point, angle):
+        """return the size of the summary
+        """
+        cdef DTYPE_t[3] query_pt
+        cdef float* summary
+        cdef int i, n = self.n_points
+
+        summary = <float*> malloc(sizeof(float) * n * (self.n_dimensions + 2))
+
+        assert len(point) == self.n_dimensions, (
+            "Query point should be a point in dimension {}."
+            .format(self.n_dimensions))
+
+        for i in range(self.n_dimensions):
+            query_pt[i] = point[i]
+
+        return self.summarize(query_pt, summary, angle * angle)
+
     cdef long summarize(self, DTYPE_t[3] point, DTYPE_t* results,
                         float squared_theta=.5, SIZE_t cell_id=0, long idx=0
                         ) nogil:
@@ -431,6 +449,8 @@ cdef class _QuadTree:
         # Do not compute self interactions
         if duplicate and cell.is_leaf:
             return idx
+
+        # results[idx_d] = max(results[idx_d], EPSILON)
 
         # Check whether we can use this node as a summary
         # It's a summary node if the angular size as measured from the point

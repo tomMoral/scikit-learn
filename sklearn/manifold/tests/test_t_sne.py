@@ -442,7 +442,7 @@ def test_n_iter_used():
                         method=method, early_exaggeration=1.0, n_iter=n_iter)
             tsne.fit_transform(X)
 
-            assert tsne.n_iter_final == n_iter - 1
+            assert tsne.n_iter_ == n_iter - 1
 
 
 def test_answer_gradient_two_points():
@@ -640,9 +640,9 @@ def test_barnes_hut_angle():
 def test_n_iter_without_progress():
     # Use a dummy negative n_iter_without_progress and check output on stdout
     random_state = check_random_state(0)
-    X = random_state.randn(100, 2)
-    tsne = TSNE(n_iter_without_progress=-1, verbose=2, learning_rate=1e8,
-                random_state=1, method='exact', n_iter=300)
+    X = random_state.randn(100, 10)
+    tsne = TSNE(n_iter_without_progress=-1, verbose=10, learning_rate=1e8,
+                random_state=0, method='barnes_hut', n_iter=300)
 
     old_stdout = sys.stdout
     sys.stdout = StringIO()
@@ -732,7 +732,8 @@ def check_uniform_grid(method, seeds=[0, 1, 2], n_iter=1000):
     """Make sure that TSNE can approximately recover a uniform 2D grid"""
     for seed in seeds:
         tsne = TSNE(n_components=2, init='random', random_state=seed,
-                    perplexity=10, n_iter=n_iter)
+                    perplexity=30, n_iter=n_iter, method=method,
+                    verbose=10)
         Y = tsne.fit_transform(X_2d_grid)
 
         # Ensure that the convergence criterion has been triggered
@@ -755,3 +756,24 @@ def check_uniform_grid(method, seeds=[0, 1, 2], n_iter=1000):
 def test_uniform_grid():
     for method in ['barnes_hut', 'exact']:
         yield check_uniform_grid, method
+
+
+def test_bh_match_exact():
+    # check that the ``barnes_hut`` method match the exact one when
+    # ``angle = 0`` and ``perplexity > n_samples / 3``
+    random_state = check_random_state(0)
+    n_features = 10
+    X = random_state.randn(30, n_features).astype(np.float32)
+    X_embeddeds = {}
+    n_iter = {}
+    for method in ['exact', 'barnes_hut']:
+        tsne = TSNE(n_components=2, perplexity=10, method=method,
+                    learning_rate=100.0, init="random", random_state=0,
+                    angle=0, n_iter=351, early_exaggeration=12.0, verbose=10,
+                    n_iter_without_progress=30)
+        X_embeddeds[method] = tsne.fit_transform(X)
+        n_iter[method] = tsne.n_iter_
+
+    assert n_iter['exact'] == n_iter['barnes_hut']
+    assert_array_almost_equal(X_embeddeds['exact'], X_embeddeds['barnes_hut'],
+                              decimal=3)
