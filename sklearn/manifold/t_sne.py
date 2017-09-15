@@ -336,6 +336,9 @@ def _gradient_descent(objective, p0, it, n_iter,
 
     tic = time()
     for i in range(it, n_iter):
+
+        if verbose > 10:
+            print("\n[t-SNE] Iteration {}".format(i + 1))
         error, grad = objective(p, *args, **kwargs)
         grad_norm = linalg.norm(grad)
 
@@ -821,7 +824,7 @@ class TSNE(BaseEstimator):
         # optimization with a higher momentum at 0.8
         P /= self.early_exaggeration
         remaining = self.n_iter - self._EXPLORATION_N_ITER
-        if it < self._EXPLORATION_N_ITER or remaining > 0:
+        if it < self._EXPLORATION_N_ITER - 1 or remaining > 0:
             opt_args['n_iter'] = self.n_iter
             opt_args['it'] = it + 1
             opt_args['momentum'] = 0.8

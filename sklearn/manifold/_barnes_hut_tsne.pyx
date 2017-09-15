@@ -62,6 +62,8 @@ cdef float compute_gradient(float[:] val_P,
         double[1] sum_Q
         clock_t t1, t2
         float sQ, error
+        float grad_p = 0.
+        float grad_n = 0.
 
     if qt.verbose > 11:
         printf("[t-SNE] Allocating %li elements in force arrays\n",
@@ -88,6 +90,16 @@ cdef float compute_gradient(float[:] val_P,
         for ax in range(n_dimensions):
             coord = i * n_dimensions + ax
             tot_force[i, ax] = pos_f[coord] - (neg_f[coord] / sQ)
+
+    if qt.verbose > 15:
+        for i in range(start, n_samples):
+            for ax in range(n_dimensions):
+                coord = i * n_dimensions + ax
+                grad_p += pos_f[coord] * pos_f[coord]
+                grad_n += neg_f[coord] * neg_f[coord]
+
+        printf("[t-SNE] neg_grad=%1.4f / pos_grad=%1.4f\n", grad_n, grad_p)
+        printf("[t-SNE] sQ=%1.4f\n", sQ)
 
     free(neg_f)
     free(pos_f)
@@ -237,8 +249,6 @@ def gradient(float[:] val_P,
         printf("[t-SNE] Initializing tree of n_dimensions %i\n", n_dimensions)
     cdef quad_tree._QuadTree qt = quad_tree._QuadTree(pos_output.shape[1],
                                                       verbose)
-    if verbose > 10:
-        printf("[t-SNE] Inserting %li points\n", pos_output.shape[0])
     qt.build_tree(pos_output)
     if verbose > 10:
         # XXX: format hack to workaround lack of `const char *` type

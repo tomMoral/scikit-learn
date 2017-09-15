@@ -145,7 +145,7 @@ cdef class _QuadTree:
         cdef Cell* cell = &self.cells[cell_id]
         cdef SIZE_t n_point = cell.cumulative_size
 
-        if self.verbose > 10:
+        if self.verbose >= 50:
             printf("[QuadTree] Inserting depth %li\n", cell.depth)
 
         # Assert that the point is in the right range
@@ -159,7 +159,7 @@ cdef class _QuadTree:
             for i in range(self.n_dimensions):
                 cell.barycenter[i] = point[i]
             cell.point_index = point_index
-            if self.verbose > 10:
+            if self.verbose >= 50:
                 printf("[QuadTree] inserted point %li in cell %li\n",
                        point_index, cell_id)
             return cell_id
@@ -177,7 +177,7 @@ cdef class _QuadTree:
 
             # Insert child in the correct subtree
             selected_child = self._select_child(point, cell)
-            if self.verbose > 49:
+            if self.verbose >= 50:
                 printf("[QuadTree] selected child %li\n", selected_child)
             if selected_child == -1:
                 self.n_points += 1
@@ -265,7 +265,7 @@ cdef class _QuadTree:
         if DEBUGFLAG:
             # Assert that the point is in the right range
             self._check_point_in_cell(point, child)
-        if self.verbose > 10:
+        if self.verbose >= 50:
             printf("[QuadTree] inserted point %li in new child %li\n",
                    point_index, cell_id)
 
