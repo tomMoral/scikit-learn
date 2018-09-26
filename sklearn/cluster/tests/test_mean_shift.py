@@ -68,6 +68,8 @@ def test_parallel():
     centers = np.array([[1, 1], [-1, -1], [1, -1]]) + 10
     X, _ = make_blobs(n_samples=50, n_features=2, centers=centers,
                       cluster_std=0.4, shuffle=True, random_state=11)
+    import faulthandler
+    faulthandler.dump_traceback_later(30, exit=True)
 
     ms1 = MeanShift(n_jobs=2)
     ms1.fit(X)
@@ -75,6 +77,7 @@ def test_parallel():
     ms2 = MeanShift()
     ms2.fit(X)
 
+    faulthandler.cancel_dump_traceback_later()
     assert_array_almost_equal(ms1.cluster_centers_, ms2.cluster_centers_)
     assert_array_equal(ms1.labels_, ms2.labels_)
 

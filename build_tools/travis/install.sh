@@ -86,6 +86,10 @@ elif [[ "$DISTRIB" == "ubuntu" ]]; then
     source testvenv/bin/activate
     pip install pytest pytest-cov cython==$CYTHON_VERSION
 
+    if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+	    pip install faulthandler
+    fi
+
 elif [[ "$DISTRIB" == "scipy-dev" ]]; then
     make_conda python=3.7
     pip install --upgrade pip setuptools
